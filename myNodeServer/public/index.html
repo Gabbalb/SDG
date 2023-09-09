@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html data-theme="cupcake">
+<head>
+  <title>Select Topic</title>
+    <link href="https://cdn.jsdelivr.net/npm/daisyui@3.6.4/dist/full.css" rel="stylesheet" type="text/css" />
+    <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    .max-w-md {
+      max-width: 60rem !important;
+    }
+  </style>
+  <script>
+    function loadTopics() {
+      fetch('/getAvailableTopics')
+        .then(response => response.json())
+        .then(data => populateTopics(data));
+    }
+
+    function populateTopics(topics) {
+      const dropdown = document.getElementById("topicsDropdown");
+      topics.forEach(topic => {
+        const option = document.createElement("option");
+        option.value = topic;
+        option.text = topic;
+        dropdown.add(option);
+      });
+    }
+
+    function submitForm() {
+      const topic = document.getElementById("topicsDropdown").value;
+      const school = document.getElementById("schoolName").value;
+      const nameInCharge = document.getElementById("nameInCharge").value;
+      const email = document.getElementById("email").value;
+      const phoneNumber = document.getElementById("phoneNumber").value;
+      const numParticipants = document.getElementById("numParticipants").value;
+
+      fetch('/chooseTopic', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          topic,
+          school,
+          nameInCharge,
+          email,
+          phoneNumber,
+          numParticipants
+        })
+      })
+      .then(response => response.json())
+      .then(data => showConfirmation(data.success));
+    }
+
+    function showConfirmation(success) {
+      if (success) {
+        document.getElementById("topicForm").style.display = "none";
+        document.getElementById("confirmationMessage").style.display = "block";
+      } else {
+        document.getElementById("message").innerText = "Error: The topic is not available or there was an error processing your request.";
+      }
+    }
+  </script>
+</head>
+<body class="bg-gray-100" onload="loadTopics()">
+  <form id="topicForm" class="max-w-md mx-auto bg-white p-8 rounded-xl shadow-lg mt-10">
+    <h1 class="text-2xl font-bold mb-4">Select a Topic</h1>
+    <div class="mb-4">
+      <label for="topicsDropdown" class="block text-sm text-gray-600">Topic</label>
+      <select id="topicsDropdown" class="form-select block w-full mt-1"></select>
+    </div>
+
+    <!-- ... other form fields here ... -->
+    <label for="schoolName">School Name:</label>
+    <input type="text" id="schoolName" name="schoolName" required class="m-1 p-2 border-2 border-blue-400 rounded-md">
+    <br>
+    <label for="nameInCharge">First and second name of person in charge:</label>
+    <input type="text" id="nameInCharge" name="nameInCharge" required class="m-1 p-2 border-2 border-blue-400 rounded-md">
+    <br>
+    <label for="email">Email:</label>
+    <input type="email" id="email" name="email" required class="m-1 p-2 border-2 border-blue-400 rounded-md">
+    <br>
+    <label for="phoneNumber">Phone Number:</label>
+    <input type="tel" id="phoneNumber" name="phoneNumber" required class="m-1 p-2 border-2 border-blue-400 rounded-md">
+    <br>
+    <label for="numParticipants">Number of Participants:</label>
+    <input type="number" id="numParticipants" name="numParticipants" required class="m-1 p-2 border-2 border-blue-400 rounded-md">
+    <br>
+
+    <button class="btn" type="button" onclick="submitForm()" >Choose Topic</button>
+  </form>
+
+  <div id="message" class="text-center text-red-600 mt-4"></div>
+  <div id="confirmationMessage" style="display:none;" class="text-center text-green-600 mt-4">
+    <h1>Selection was successful!</h1>
+    <p>Thank you for choosing a topic.</p>
+  </div>
+</body>
+</html>
